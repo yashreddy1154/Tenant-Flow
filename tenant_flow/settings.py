@@ -57,7 +57,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'tenent_flow.urls'
+ROOT_URLCONF = 'tenant_flow.urls'
 
 TEMPLATES = [
     {
@@ -74,7 +74,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'tenent_flow.wsgi.application'
+WSGI_APPLICATION = 'tenant_flow.wsgi.application'
 
 
 # Database
