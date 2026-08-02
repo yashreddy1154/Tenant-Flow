@@ -93,7 +93,7 @@ def invite_member_view(request):
                 [email],
                 fail_silently=False,
             )
-            messages.success(request, f"Invite sent to {email}")
+            messages.success(request, f"Invite sent to {email}. Link: {join_url}")
             return redirect('home')
     return render(request, 'accounts/invite.html')
 
