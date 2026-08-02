@@ -146,16 +146,7 @@
         <div style="background: var(--surface-color); padding: 1.5rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
             <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">Task Details</h3>
             
-            {% if task.labels.all %}
-            <div style="margin-bottom: 1.25rem;">
-                <span style="display: block; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.5rem;">Labels</span>
-                <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
-                    {% for label in task.labels.all %}
-                        <span style="font-size: 0.75rem; background-color: {{ label.color|default:'#E5E7EB' }}; color: #1F2937; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500;">{{ label.name }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
+
             
             <div style="margin-bottom: 1.25rem;">
                 <span style="display: block; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.25rem;">Assignee</span>

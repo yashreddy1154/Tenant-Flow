@@ -1,5 +1,5 @@
 from django import forms
-from .models import Task, TaskComment, Subtask, TaskLabel
+from .models import Task, TaskComment, Subtask
 from apps.projects.models import Project
 from django.contrib.auth import get_user_model
 
@@ -8,10 +8,11 @@ User = get_user_model()
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['project', 'title', 'description', 'status', 'priority', 'due_date', 'estimated_hours', 'assignee', 'labels']
+        fields = ['project', 'title', 'description', 'status', 'priority', 'due_date', 'estimated_hours', 'assignee']
         widgets = {
             'due_date': forms.DateInput(attrs={'type': 'date'}),
             'description': forms.Textarea(attrs={'rows': 3}),
+            'labels': forms.CheckboxSelectMultiple(),
         }
 
     def __init__(self, *args, **kwargs):
@@ -24,15 +25,6 @@ class TaskForm(forms.ModelForm):
             else:
                 self.fields['project'].queryset = Project.objects.filter(organization=user.organization, team_leader=user)
             self.fields['assignee'].queryset = User.objects.filter(organization=user.organization)
-            self.fields['labels'].queryset = TaskLabel.objects.filter(organization=user.organization)
-
-class TaskLabelForm(forms.ModelForm):
-    class Meta:
-        model = TaskLabel
-        fields = ['name', 'color']
-        widgets = {
-            'color': forms.TextInput(attrs={'type': 'color'}),
-        }
 
 class TaskStatusForm(forms.ModelForm):
     class Meta:

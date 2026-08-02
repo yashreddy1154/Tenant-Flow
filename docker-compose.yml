@@ -2,16 +2,35 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: tenant_flow_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
     environment:
-      POSTGRES_DB: ${DB_NAME:-tenant_flow}
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=tenant_flow_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
       - "5432:5432"
+    restart: unless-stopped
+
+  web:
+    build: .
+    container_name: tenant_flow_web
+    command: gunicorn tenant_flow.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_ENGINE=postgres
+      - DB_NAME=tenant_flow_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      - db
     restart: unless-stopped
 
 volumes:

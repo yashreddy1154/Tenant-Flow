@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Task, Subtask, TaskComment, TaskLabel
+from .models import Task, Subtask, TaskComment
 from apps.projects.models import Project
-from .forms import TaskForm, TaskStatusForm, TaskCommentForm, SubtaskForm, TaskLabelForm
+from .forms import TaskForm, TaskStatusForm, TaskCommentForm, SubtaskForm
 from django.contrib import messages
 from apps.notifications.models import Notification
 from django.urls import reverse
@@ -192,28 +192,6 @@ def task_subtask_toggle(request, pk):
         subtask.save()
         
     return redirect('task_detail', pk=subtask.task.pk)
-
-@login_required
-def task_label_create(request):
-    is_admin = request.user.role == 'Admin'
-    is_leader = Project.objects.filter(organization=request.user.organization, team_leader=request.user).exists()
-    
-    if not (is_admin or is_leader):
-        messages.error(request, "You do not have permission to create labels.")
-        return redirect('task_list')
-
-    if request.method == 'POST':
-        form = TaskLabelForm(request.POST)
-        if form.is_valid():
-            label = form.save(commit=False)
-            label.organization = request.user.organization
-            label.save()
-            messages.success(request, f"Label '{label.name}' created.")
-            return redirect('task_list')
-    else:
-        form = TaskLabelForm()
-    
-    return render(request, 'tasks/task_label_create.html', {'form': form})
 
 @login_required
 def task_update_status_api(request, pk):

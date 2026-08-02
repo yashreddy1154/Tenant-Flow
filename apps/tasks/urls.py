@@ -8,6 +8,5 @@ urlpatterns = [
     path('<int:pk>/comment/', views.task_comment_create, name='task_comment_create'),
     path('<int:pk>/subtask/', views.task_subtask_create, name='task_subtask_create'),
     path('subtask/<int:pk>/toggle/', views.task_subtask_toggle, name='task_subtask_toggle'),
-    path('labels/create/', views.task_label_create, name='task_label_create'),
     path('api/<int:pk>/status/', views.task_update_status_api, name='task_update_status_api'),
 ]
