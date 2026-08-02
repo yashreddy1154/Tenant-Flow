@@ -21,7 +21,7 @@ services:
     volumes:
       - .:/app
     ports:
-      - "8000:8000"
+      - "80:8000"
     environment:
       - DB_ENGINE=postgres
       - DB_NAME=tenant_flow_db
@@ -29,6 +29,9 @@ services:
       - DB_PASSWORD=postgres
       - DB_HOST=db
       - DB_PORT=5432
+      - SECRET_KEY=django-insecure-docker-compose-secret-key-123
+      - DEBUG=False
+      - ALLOWED_HOSTS=*
     depends_on:
       - db
     restart: unless-stopped
