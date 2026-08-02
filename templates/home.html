@@ -1,1 +1,27 @@
-<h1>This is the home page</h1>
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | TenantFlow{% endblock %}
+
+{% block content %}
+<h1 class="section-title">Dashboard</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-title">Active Projects</span>
+        <span class="stat-value">{{ projects_count|default:"0" }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-title">Tasks Pending</span>
+        <span class="stat-value">{{ tasks_count|default:"0" }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-title">Team Members</span>
+        <span class="stat-value">{{ members_count|default:"0" }}</span>
+    </div>
+</div>
+
+<div style="background: var(--surface-color); padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <h3>Welcome to TenantFlow</h3>
+    <p style="margin-top: 1rem; color: var(--text-secondary);">This is a placeholder for your recent activity and notifications.</p>
+</div>
+{% endblock %}

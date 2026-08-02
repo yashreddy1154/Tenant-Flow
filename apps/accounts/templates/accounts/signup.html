@@ -1,1 +1,29 @@
-<h1>This is the Sign Up Page</h1>
+{% extends 'auth_base.html' %}
+
+{% block title %}Create Organization | TenantFlow{% endblock %}
+
+{% block content %}
+    <h1 class="auth-title">Start your workspace</h1>
+    <p class="auth-subtitle">Create a new organization on TenantFlow</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_organization_name">Organization Name</label>
+            {{ form.organization_name }}
+        </div>
+        <div class="form-group">
+            <label for="id_email">Work Email</label>
+            {{ form.email }}
+        </div>
+        <div class="form-group">
+            <label for="id_password">Password</label>
+            {{ form.password }}
+        </div>
+        <button type="submit" class="btn">Create Organization</button>
+    </form>
+
+    <div class="auth-footer">
+        Already have an account? <a href="{% url 'login' %}">Log in</a>
+    </div>
+{% endblock %}

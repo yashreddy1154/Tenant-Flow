@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Invite Member | TenantFlow{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto; background: var(--surface-color); padding: 2rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <h2 style="margin-bottom: 0.5rem;">Invite a Team Member</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.875rem;">Send an email invitation to a new employee to join your organization.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div style="margin-bottom: 1.5rem;">
+            <label for="email" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Email Address</label>
+            <input type="email" name="email" id="email" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.5rem; font-family: inherit;">
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">Send Invite Link</button>
+    </form>
+</div>
+{% endblock %}

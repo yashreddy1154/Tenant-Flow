@@ -1,1 +1,51 @@
-<h1>This is the Projects Dashboard</h1>
+{% extends 'base.html' %}
+
+{% block title %}Projects | TenantFlow{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1 class="section-title" style="margin-bottom: 0;">Projects</h1>
+    <a href="{% url 'project_create' %}" class="btn">+ New Project</a>
+</div>
+
+{% if messages %}
+    <div style="margin-bottom: 1.5rem;">
+        {% for message in messages %}
+            <div style="padding: 1rem; border-radius: 0.5rem; background-color: #D1FAE5; color: #065F46;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% if projects %}
+    <div class="stats-grid">
+        {% for project in projects %}
+            <a href="{% url 'project_detail' project.pk %}" style="text-decoration: none; color: inherit;">
+                <div class="stat-card" style="transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1.125rem; font-weight: 600;">{{ project.name }}</h3>
+                        <span style="font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 9999px; 
+                            {% if project.status == 'Active' %}background-color: #DEF7EC; color: #03543F;{% else %}background-color: #F3F4F6; color: #4B5563;{% endif %}">
+                            {{ project.status }}
+                        </span>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem; flex: 1;">
+                        {{ project.description|truncatewords:15|default:"No description provided." }}
+                    </p>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between;">
+                        <span>Tasks: {{ project.tasks.count }}</span>
+                        <span>{% if project.end_date %}Due: {{ project.end_date|date:"M d, Y" }}{% else %}No due date{% endif %}</span>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+{% else %}
+    <div style="text-align: center; padding: 4rem 2rem; background: var(--surface-color); border-radius: 1rem; border: 1px dashed var(--border-color);">
+        <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">No projects yet</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Get started by creating your first project.</p>
+        <a href="{% url 'project_create' %}" class="btn">Create Project</a>
+    </div>
+{% endif %}
+{% endblock %}

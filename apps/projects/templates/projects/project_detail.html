@@ -1,1 +1,87 @@
-<h1>This is the Project Details Page</h1>
+{% extends 'base.html' %}
+
+{% block title %}{{ project.name }} | TenantFlow{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+    <div>
+        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+            <a href="{% url 'project_list' %}" style="color: var(--text-secondary); text-decoration: none; margin-right: 1rem;">
+                &larr; Back to Projects
+            </a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <h1 class="section-title" style="margin-bottom: 0;">{{ project.name }}</h1>
+            <span style="font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 9999px; 
+                {% if project.status == 'Active' %}background-color: #DEF7EC; color: #03543F;{% else %}background-color: #F3F4F6; color: #4B5563;{% endif %}">
+                {{ project.status }}
+            </span>
+        </div>
+    </div>
+    <div style="display: flex; gap: 1rem;">
+        <button class="btn" style="background-color: var(--bg-color); color: var(--text-primary); border: 1px solid var(--border-color);">Edit Project</button>
+        <button class="btn">+ New Task</button>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+    <!-- Main Info -->
+    <div>
+        <div style="background: var(--surface-color); padding: 2rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Overview</h3>
+            <p style="color: var(--text-secondary); line-height: 1.6;">
+                {{ project.description|default:"No description provided for this project." }}
+            </p>
+        </div>
+
+        <div style="background: var(--surface-color); padding: 2rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0;">Tasks</h3>
+                <span style="color: var(--text-secondary); font-size: 0.875rem;">{{ project.tasks.count }} total</span>
+            </div>
+            
+            {% if project.tasks.exists %}
+                <!-- Tasks will be rendered here later -->
+                <p style="color: var(--text-secondary); font-size: 0.875rem;">Tasks list coming soon.</p>
+            {% else %}
+                <div style="text-align: center; padding: 2rem; border: 1px dashed var(--border-color); border-radius: 0.5rem;">
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">No tasks created yet.</p>
+                    <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Create First Task</button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sidebar Info -->
+    <div>
+        <div style="background: var(--surface-color); padding: 1.5rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">Project Details</h3>
+            
+            <div style="margin-bottom: 1rem;">
+                <span style="display: block; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.25rem;">Start Date</span>
+                <span style="font-size: 0.875rem; font-weight: 500;">{{ project.start_date|date:"M d, Y"|default:"Not set" }}</span>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <span style="display: block; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.25rem;">End Date</span>
+                <span style="font-size: 0.875rem; font-weight: 500;">{{ project.end_date|date:"M d, Y"|default:"Not set" }}</span>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <span style="display: block; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.25rem;">Budget</span>
+                <span style="font-size: 0.875rem; font-weight: 500;">{% if project.budget %}${{ project.budget }}{% else %}Not set{% endif %}</span>
+            </div>
+
+            <div>
+                <span style="display: block; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.25rem;">Created By</span>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 24px; height: 24px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600;">
+                        {{ project.created_by.email|make_list|first|upper }}
+                    </div>
+                    <span style="font-size: 0.875rem; font-weight: 500;">{{ project.created_by.email }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
