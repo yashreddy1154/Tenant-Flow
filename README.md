@@ -1,131 +1,68 @@
-# 🚧 TenantFlow (Under Construction)
+# TenantFlow
 
-> **Project Status:** 🚧 Under Development
+TenantFlow is a cloud-native, multi-tenant SaaS application built with Django. It empowers organizations to securely manage their employees, projects, tasks, and documents within a single, unified platform while ensuring strict data isolation between tenants.
 
-TenantFlow is a cloud-native multi-tenant SaaS application built using **Django**. The platform allows multiple organizations to securely manage their employees, projects, tasks, and documents within a single application while keeping each organization's data isolated.
+## Features
 
-The goal of this project is to build a production-style application using modern development practices and technologies such as Django, PostgreSQL, Docker, and AWS.
+- **Multi-Tenancy:** Secure data isolation using an organization-based architecture.
+- **Role-Based Access Control:** Distinct roles and permissions for administrators, project managers, and employees.
+- **Project & Task Management:** Create projects, assign tasks, manage task hierarchies (subtasks), and track statuses.
+- **Document Storage:** Centralized document upload and management per organization.
+- **Notifications:** Real-time in-app notifications and activity feeds.
 
----
+## Tech Stack
 
-# 🛠️ Tech Stack
+- **Backend:** Python, Django
+- **Database:** PostgreSQL
+- **Frontend:** HTML5, Vanilla CSS, JavaScript
+- **Infrastructure:** Docker, Docker Compose, AWS EC2
+- **Static File Serving:** Whitenoise, Gunicorn
 
-- Python
-- Django
-- HTML
-- CSS
-- JavaScript
-- PostgreSQL *(planned)*
-- Docker *(planned)*
-- AWS *(planned)*
+## Project Structure
 
----
+- `apps/` - Core Django applications.
+  - `accounts/` - Authentication flows (login, register).
+  - `core/` - Shared utilities, base models, and common functionality.
+  - `documents/` - Secure file upload and management.
+  - `notifications/` - Activity tracking and system alerts.
+  - `organizations/` - Multi-tenant isolation logic and tenant management.
+  - `projects/` & `tasks/` - Core productivity and workflow features.
+  - `users/` - User profile and employee management.
+- `tenant_flow/` - Django project configuration, settings, and root URL routing.
+- `static/` & `templates/` - Shared UI assets, CSS, JavaScript, and HTML layouts.
 
-# 📁 Project Structure
+## Local Development Setup
 
-```
-tenant_flow/
-│
-├── apps/
-│   ├── accounts/
-│   ├── core/
-│   ├── documents/
-│   ├── notifications/
-│   ├── organizations/
-│   ├── projects/
-│   ├── tasks/
-│   └── users/
-│
-├── requirements/
-│
-├── static/
-├── templates/
-├── media/
-│
-├── tenent_flow/
-│
-└── manage.py
-```
+The easiest way to run TenantFlow locally is using Docker.
 
----
+**Prerequisites:** 
+- Docker and Docker Compose installed on your machine.
 
-# 📌 Folder Overview
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yashreddy1154/Tenant-Flow.git
+   cd Tenant-Flow
+   ```
 
-### `apps/`
-Contains all Django applications. Each app is responsible for one feature of the project.
+2. **Boot the environment**
+   ```bash
+   docker-compose up --build
+   ```
+   *Note: This command automatically spins up the PostgreSQL database, applies all necessary Django migrations, collects static files, and boots the server.*
 
-- **accounts** → Authentication (Login, Register, Logout)
-- **core** → Shared utilities, base classes, and common functionality
-- **documents** → Document upload and management
-- **notifications** → Email and in-app notifications
-- **organizations** → Organization and tenant management
-- **projects** → Project management
-- **tasks** → Task management
-- **users** → User profiles and employee information
+3. **Access the Application**
+   Open your browser and navigate to `http://localhost:8000`.
 
----
+## Production Deployment
 
-### `templates/`
+TenantFlow is configured out-of-the-box for containerized deployment on Linux environments (e.g., AWS EC2). 
 
-Stores shared HTML templates like `base.html`, common components, and error pages.
+Production-ready configurations include:
+- **Gunicorn** WSGI server integration.
+- **Whitenoise** middleware for optimized static file serving without requiring NGINX.
+- **Secure Environment Variables** for database credentials, secret keys, and debug toggles.
 
-Each app also contains its own templates inside:
-
-```
-apps/<app_name>/templates/<app_name>/
-```
-
-This keeps every app independent and reusable.
-
----
-
-### `static/`
-
-Stores shared static files.
-
-Each app can also have its own static files inside:
-
-```
-apps/<app_name>/static/<app_name>/
-```
-
----
-
-### `media/`
-
-Stores uploaded files during development.
-
----
-
-### `requirements/`
-
-Contains project dependencies.
-
----
-
-### `tenent_flow/`
-
-Project configuration.
-
-Contains:
-
-- settings.py
-- urls.py
-- asgi.py
-- wsgi.py
-
----
-
-# 📖 Development Notes
-
-- Each feature is developed inside its own Django app.
-- Every app has its own `urls.py`.
-- Templates and static files are organized per app for better maintainability.
-- The project is being developed in a modular and scalable way.
-
----
-
-# 👥 Team
+## Team
 
 - Yash
 - Dheeraj
