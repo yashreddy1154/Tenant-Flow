@@ -12,6 +12,16 @@
             <label for="id_organization_name">Organization Name</label>
             {{ form.organization_name }}
         </div>
+        <div style="display: flex; gap: 1rem;">
+            <div class="form-group" style="flex: 1;">
+                <label for="id_industry_type">Industry/Type</label>
+                {{ form.industry_type }}
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="id_company_size">Company Size</label>
+                {{ form.company_size }}
+            </div>
+        </div>
         <div class="form-group">
             <label for="id_email">Work Email</label>
             {{ form.email }}
@@ -19,9 +29,51 @@
         <div class="form-group">
             <label for="id_password">Password</label>
             {{ form.password }}
+            <div style="margin-top: 0.5rem; height: 4px; background: var(--border-color); border-radius: 2px; overflow: hidden;">
+                <div id="password-strength" style="height: 100%; width: 0%; transition: all 0.3s;"></div>
+            </div>
+            <div id="password-strength-text" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;"></div>
         </div>
         <button type="submit" class="btn">Create Organization</button>
     </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('id_password');
+            const strengthBar = document.getElementById('password-strength');
+            const strengthText = document.getElementById('password-strength-text');
+
+            if(passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    const val = passwordInput.value;
+                    let strength = 0;
+                    if(val.length > 5) strength += 25;
+                    if(val.length > 8) strength += 25;
+                    if(/[A-Z]/.test(val)) strength += 25;
+                    if(/[0-9]/.test(val)) strength += 25;
+
+                    strengthBar.style.width = strength + '%';
+                    
+                    if(strength === 0) {
+                        strengthBar.style.backgroundColor = 'transparent';
+                        strengthText.textContent = '';
+                    } else if(strength <= 25) {
+                        strengthBar.style.backgroundColor = '#EF4444'; // Red
+                        strengthText.textContent = 'Weak';
+                        strengthText.style.color = '#EF4444';
+                    } else if(strength <= 75) {
+                        strengthBar.style.backgroundColor = '#F59E0B'; // Yellow
+                        strengthText.textContent = 'Fair';
+                        strengthText.style.color = '#F59E0B';
+                    } else {
+                        strengthBar.style.backgroundColor = '#10B981'; // Green
+                        strengthText.textContent = 'Strong';
+                        strengthText.style.color = '#10B981';
+                    }
+                });
+            }
+        });
+    </script>
 
     <div class="auth-footer">
         Already have an account? <a href="{% url 'login' %}">Log in</a>

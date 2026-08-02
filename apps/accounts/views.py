@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
@@ -6,7 +6,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
-from .forms import OrganizationSignupForm
+from .forms import OrganizationSignupForm, MemberEditForm
 from django.contrib import messages
 from apps.users.models import User
 from django.urls import reverse
@@ -56,15 +56,29 @@ def logout_view(request):
 
 @login_required
 def invite_member_view(request):
+    if request.user.role != 'Admin':
+        messages.error(request, "You do not have permission to invite members.")
+        return redirect('home')
+        
     if request.method == 'POST':
         email = request.POST.get('email')
+        role = request.POST.get('role', 'Member')
+        department = request.POST.get('department', '')
         if email:
-            # Create a user with unusable password
             user, created = User.objects.get_or_create(email=email)
-            if created:
+            if not created:
+                if user.organization and user.organization != request.user.organization:
+                    messages.error(request, f"User {email} already belongs to another organization.")
+                    return redirect('team_management')
+                elif user.organization == request.user.organization:
+                    messages.info(request, f"User {email} is already in your team.")
+                    return redirect('team_management')
+            else:
+                # Create a user with unusable password if they are brand new
                 user.set_unusable_password()
                 user.organization = request.user.organization
-                user.role = 'Member'
+                user.role = role
+                user.department = department
                 user.save()
             
             # Generate token and send email
@@ -112,3 +126,40 @@ def login_user(req):
 
 def regester(req):
     return render(req,"accounts/register.html")
+
+@login_required
+def member_edit_view(request, pk):
+    if request.user.role != 'Admin':
+        messages.error(request, "Only Administrators can edit members.")
+        return redirect('team_management')
+        
+    member = get_object_or_404(User, pk=pk, organization=request.user.organization)
+    
+    if request.method == 'POST':
+        form = MemberEditForm(request.POST, instance=member)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Updated {member.email}'s profile.")
+            return redirect('team_management')
+    else:
+        form = MemberEditForm(instance=member)
+        
+    return render(request, 'organizations/member_edit.html', {'form': form, 'member': member})
+
+@login_required
+def member_remove_view(request, pk):
+    if request.user.role != 'Admin':
+        messages.error(request, "Only Administrators can remove members.")
+        return redirect('team_management')
+        
+    member = get_object_or_404(User, pk=pk, organization=request.user.organization)
+    
+    if request.method == 'POST':
+        member.organization = None
+        member.role = 'Member'
+        member.department = ''
+        member.save()
+        messages.success(request, f"Removed {member.email} from the organization.")
+        return redirect('team_management')
+        
+    return render(request, 'organizations/member_remove_confirm.html', {'member': member})

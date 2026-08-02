@@ -1,1 +1,58 @@
-<h1>This is the Organization Settings Page</h1>
+{% extends 'base.html' %}
+
+{% block title %}Organization Settings | TenantFlow{% endblock %}
+
+{% block content %}
+<h1 class="section-title">Organization Settings</h1>
+
+{% if messages %}
+    <div style="margin-bottom: 1.5rem;">
+        {% for message in messages %}
+            <div style="padding: 1rem; border-radius: 0.5rem; background-color: #D1FAE5; color: #065F46;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div style="max-width: 600px;">
+    <div style="background: var(--surface-color); padding: 2rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem;">General Information</h3>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.875rem;">
+                        {{ field.label }}
+                    </label>
+                    
+                    {% if field.name == 'description' %}
+                        <textarea name="{{ field.name }}" id="{{ field.id_for_label }}" rows="4" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.5rem; font-family: inherit; resize: vertical;">{{ field.value|default:'' }}</textarea>
+                    {% elif field.name == 'logo' %}
+                        {% if field.value %}
+                            <div style="margin-bottom: 0.5rem;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary);">Current: {{ field.value }}</span>
+                            </div>
+                        {% endif %}
+                        <input type="file" name="{{ field.name }}" id="{{ field.id_for_label }}" style="width: 100%; padding: 0.75rem; border: 1px dashed var(--border-color); border-radius: 0.5rem; font-family: inherit;" accept="image/*">
+                    {% else %}
+                        <input type="{{ field.field.widget.input_type|default:'text' }}" name="{{ field.name }}" id="{{ field.id_for_label }}" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.5rem; font-family: inherit;" value="{{ field.value|default:'' }}" {% if field.field.required %}required{% endif %}>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                        <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">
+                            {{ field.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <div style="margin-top: 2rem;">
+                <button type="submit" class="btn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

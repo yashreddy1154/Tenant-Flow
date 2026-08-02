@@ -5,7 +5,9 @@
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <h1 class="section-title" style="margin-bottom: 0;">Projects</h1>
+    {% if request.user.role == 'Admin' %}
     <a href="{% url 'project_create' %}" class="btn">+ New Project</a>
+    {% endif %}
 </div>
 
 {% if messages %}
@@ -18,22 +20,55 @@
     </div>
 {% endif %}
 
+<div style="background: var(--surface-color); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border-color); margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center; justify-content: space-between;">
+    <form method="get" style="display: flex; gap: 1rem; flex: 1; align-items: center; margin: 0;">
+        <input type="text" name="q" value="{{ current_q }}" placeholder="Search projects..." style="flex: 1; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
+        
+        <select name="status" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
+            <option value="All" {% if current_status == 'All' %}selected{% endif %}>All Statuses</option>
+            <option value="Active" {% if current_status == 'Active' %}selected{% endif %}>Active</option>
+            <option value="Archived" {% if current_status == 'Archived' %}selected{% endif %}>Archived</option>
+        </select>
+        
+        <select name="sort" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
+            <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Newest First</option>
+            <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+            <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name (A-Z)</option>
+            <option value="-name" {% if current_sort == '-name' %}selected{% endif %}>Name (Z-A)</option>
+        </select>
+        
+        <button type="submit" class="btn" style="padding: 0.5rem 1rem;">Filter</button>
+        {% if current_q or current_status != 'Active' or current_sort != '-created_at' %}
+            <a href="{% url 'project_list' %}" style="font-size: 0.875rem; color: var(--text-secondary); text-decoration: none;">Clear</a>
+        {% endif %}
+    </form>
+    
+    <div style="display: flex; gap: 0.5rem; border-left: 1px solid var(--border-color); padding-left: 1rem;">
+        <button id="view-grid-btn" style="background: none; border: none; cursor: pointer; color: var(--primary-color);">
+            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        </button>
+        <button id="view-list-btn" style="background: none; border: none; cursor: pointer; color: var(--text-secondary);">
+            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
+</div>
+
 {% if projects %}
-    <div class="stats-grid">
+    <div id="projects-container" class="stats-grid">
         {% for project in projects %}
-            <a href="{% url 'project_detail' project.pk %}" style="text-decoration: none; color: inherit;">
-                <div class="stat-card" style="transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                        <h3 style="font-size: 1.125rem; font-weight: 600;">{{ project.name }}</h3>
+            <a href="{% url 'project_detail' project.pk %}" style="text-decoration: none; color: inherit; display: block;" class="project-card-link">
+                <div class="stat-card" style="transition: transform 0.2s; cursor: pointer; height: 100%; display: flex; flex-direction: column;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;" class="card-header">
+                        <h3 style="font-size: 1.125rem; font-weight: 600;" class="project-name">{{ project.name }}</h3>
                         <span style="font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 9999px; 
                             {% if project.status == 'Active' %}background-color: #DEF7EC; color: #03543F;{% else %}background-color: #F3F4F6; color: #4B5563;{% endif %}">
                             {{ project.status }}
                         </span>
                     </div>
-                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem; flex: 1;">
+                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem; flex: 1;" class="project-desc">
                         {{ project.description|truncatewords:15|default:"No description provided." }}
                     </p>
-                    <div style="font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between;">
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between;" class="project-meta">
                         <span>Tasks: {{ project.tasks.count }}</span>
                         <span>{% if project.end_date %}Due: {{ project.end_date|date:"M d, Y" }}{% else %}No due date{% endif %}</span>
                     </div>
@@ -41,11 +76,100 @@
             </a>
         {% endfor %}
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gridBtn = document.getElementById('view-grid-btn');
+            const listBtn = document.getElementById('view-list-btn');
+            const container = document.getElementById('projects-container');
+            
+            // Check localStorage for preference
+            const preferredView = localStorage.getItem('project_view_preference') || 'grid';
+            
+            function setView(view) {
+                if (view === 'list') {
+                    container.classList.remove('stats-grid');
+                    container.style.display = 'flex';
+                    container.style.flexDirection = 'column';
+                    container.style.gap = '1rem';
+                    
+                    document.querySelectorAll('.stat-card').forEach(card => {
+                        card.style.flexDirection = 'row';
+                        card.style.alignItems = 'center';
+                        card.style.gap = '2rem';
+                        card.style.padding = '1rem 1.5rem';
+                        
+                        const header = card.querySelector('.card-header');
+                        if(header) {
+                            header.style.marginBottom = '0';
+                            header.style.width = '250px';
+                            header.style.alignItems = 'center';
+                        }
+                        
+                        const desc = card.querySelector('.project-desc');
+                        if(desc) {
+                            desc.style.marginBottom = '0';
+                            desc.style.whiteSpace = 'nowrap';
+                            desc.style.overflow = 'hidden';
+                            desc.style.textOverflow = 'ellipsis';
+                        }
+                        
+                        const meta = card.querySelector('.project-meta');
+                        if(meta) {
+                            meta.style.width = '200px';
+                        }
+                    });
+                    
+                    listBtn.style.color = 'var(--primary-color)';
+                    gridBtn.style.color = 'var(--text-secondary)';
+                } else {
+                    container.classList.add('stats-grid');
+                    container.style.display = 'grid';
+                    // Reset inline styles applied for list view
+                    document.querySelectorAll('.stat-card').forEach(card => {
+                        card.style.flexDirection = 'column';
+                        card.style.alignItems = 'stretch';
+                        card.style.gap = '0';
+                        card.style.padding = '1.5rem';
+                        
+                        const header = card.querySelector('.card-header');
+                        if(header) {
+                            header.style.marginBottom = '1rem';
+                            header.style.width = 'auto';
+                            header.style.alignItems = 'start';
+                        }
+                        
+                        const desc = card.querySelector('.project-desc');
+                        if(desc) {
+                            desc.style.marginBottom = '1rem';
+                            desc.style.whiteSpace = 'normal';
+                        }
+                        
+                        const meta = card.querySelector('.project-meta');
+                        if(meta) {
+                            meta.style.width = 'auto';
+                        }
+                    });
+                    
+                    gridBtn.style.color = 'var(--primary-color)';
+                    listBtn.style.color = 'var(--text-secondary)';
+                }
+                localStorage.setItem('project_view_preference', view);
+            }
+            
+            setView(preferredView);
+            
+            gridBtn.addEventListener('click', () => setView('grid'));
+            listBtn.addEventListener('click', () => setView('list'));
+        });
+    </script>
 {% else %}
     <div style="text-align: center; padding: 4rem 2rem; background: var(--surface-color); border-radius: 1rem; border: 1px dashed var(--border-color);">
         <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">No projects yet</h3>
         <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Get started by creating your first project.</p>
+        {% if request.user.role == 'Admin' %}
         <a href="{% url 'project_create' %}" class="btn">Create Project</a>
+        {% endif %}
     </div>
 {% endif %}
 {% endblock %}

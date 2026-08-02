@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Team Member | TenantFlow{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div style="display: flex; align-items: center; margin-bottom: 2rem;">
+        <a href="{% url 'team_management' %}" style="color: var(--text-secondary); text-decoration: none; margin-right: 1rem;">
+            &larr; Back
+        </a>
+        <h1 class="section-title" style="margin-bottom: 0;">Edit Team Member</h1>
+    </div>
+
+    <div style="background: var(--surface-color); padding: 2rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+            <div style="font-size: 0.875rem; color: var(--text-secondary);">User</div>
+            <div style="font-weight: 500; font-size: 1.125rem;">{{ member.email }}</div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.875rem;">
+                        {{ field.label }}
+                    </label>
+                    
+                    {% if field.name == 'role' %}
+                        <select name="{{ field.name }}" id="{{ field.id_for_label }}" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.5rem; font-family: inherit;">
+                            {% for value, label in field.field.choices %}
+                                <option value="{{ value }}" {% if field.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <input type="{{ field.field.widget.input_type|default:'text' }}" name="{{ field.name }}" id="{{ field.id_for_label }}" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.5rem; font-family: inherit;" value="{{ field.value|default:'' }}" {% if field.field.required %}required{% endif %}>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                        <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">
+                            {{ field.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                <a href="{% url 'team_management' %}" class="btn" style="background-color: var(--bg-color); color: var(--text-primary); border: 1px solid var(--border-color);">Cancel</a>
+                <button type="submit" class="btn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Remove Team Member | TenantFlow{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div style="display: flex; align-items: center; margin-bottom: 2rem;">
+        <a href="{% url 'team_management' %}" style="color: var(--text-secondary); text-decoration: none; margin-right: 1rem;">
+            &larr; Back
+        </a>
+        <h1 class="section-title" style="margin-bottom: 0;">Remove Team Member</h1>
+    </div>
+
+    <div style="background: var(--surface-color); padding: 2rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="width: 64px; height: 64px; background: #FEE2E2; color: #DC2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Remove {{ member.email }}?</h3>
+            <p style="color: var(--text-secondary);">
+                Are you sure you want to remove this user from your organization? They will lose access to all projects and tasks. Their account will not be deleted, but they will need to be re-invited to rejoin.
+            </p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div style="display: flex; justify-content: center; gap: 1rem;">
+                <a href="{% url 'team_management' %}" class="btn" style="background-color: var(--bg-color); color: var(--text-primary); border: 1px solid var(--border-color);">Cancel</a>
+                <button type="submit" class="btn" style="background-color: #DC2626;">Yes, Remove User</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

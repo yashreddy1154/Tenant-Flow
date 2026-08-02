@@ -4,8 +4,10 @@
 
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-    <h1 class="section-title" style="margin-bottom: 0;">Tasks Board</h1>
+    <h1 class="section-title" style="margin-bottom: 0;">Task Board</h1>
+    {% if can_create_task %}
     <a href="{% url 'task_create' %}" class="btn">+ New Task</a>
+    {% endif %}
 </div>
 
 {% if messages %}
@@ -18,14 +20,55 @@
     </div>
 {% endif %}
 
-<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; align-items: start;">
+<div style="background: var(--surface-color); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border-color); margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center; justify-content: space-between;">
+    <form method="get" style="display: flex; gap: 1rem; flex: 1; align-items: center; margin: 0;">
+        <input type="text" name="q" value="{{ current_q }}" placeholder="Search tasks..." style="flex: 1; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
+        
+        <select name="priority" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
+            <option value="All" {% if current_priority == 'All' %}selected{% endif %}>All Priorities</option>
+            <option value="Low" {% if current_priority == 'Low' %}selected{% endif %}>Low</option>
+            <option value="Medium" {% if current_priority == 'Medium' %}selected{% endif %}>Medium</option>
+            <option value="High" {% if current_priority == 'High' %}selected{% endif %}>High</option>
+        </select>
+        
+        <select name="assignee" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
+            <option value="All" {% if current_assignee == 'All' %}selected{% endif %}>All Assignees</option>
+            {% for user in assignees %}
+                <option value="{{ user.pk }}" {% if current_assignee|stringformat:"s" == user.pk|stringformat:"s" %}selected{% endif %}>{{ user.email }}</option>
+            {% endfor %}
+        </select>
+        
+        <select name="sort" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
+            <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Newest First</option>
+            <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+            <option value="due_date" {% if current_sort == 'due_date' %}selected{% endif %}>Due Date</option>
+            <option value="title" {% if current_sort == 'title' %}selected{% endif %}>Title (A-Z)</option>
+        </select>
+        
+        <button type="submit" class="btn" style="padding: 0.5rem 1rem;">Filter</button>
+        {% if current_q or current_priority != 'All' or current_assignee != 'All' or current_sort != '-created_at' %}
+            <a href="{% url 'task_list' %}" style="font-size: 0.875rem; color: var(--text-secondary); text-decoration: none;">Clear</a>
+        {% endif %}
+    </form>
+    
+    <div style="display: flex; gap: 0.5rem; border-left: 1px solid var(--border-color); padding-left: 1rem;">
+        <button id="view-kanban-btn" style="background: none; border: none; cursor: pointer; color: var(--primary-color);">
+            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>
+        </button>
+        <button id="view-list-btn" style="background: none; border: none; cursor: pointer; color: var(--text-secondary);">
+            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
+</div>
+
+<div id="view-kanban" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; align-items: start;">
     
     <!-- Todo Column -->
     <div style="background-color: #F9FAFB; padding: 1rem; border-radius: 0.75rem; border: 1px solid var(--border-color);">
         <h3 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 1rem; display: flex; justify-content: space-between;">
             TODO <span style="background: #E5E7EB; padding: 0.125rem 0.5rem; border-radius: 9999px;">{{ todo_tasks.count }}</span>
         </h3>
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div class="kanban-column" data-status="Todo" style="display: flex; flex-direction: column; gap: 1rem; min-height: 200px;">
             {% for task in todo_tasks %}
                 {% include 'tasks/partials/task_card.html' with task=task %}
             {% empty %}
@@ -39,7 +82,7 @@
         <h3 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 1rem; display: flex; justify-content: space-between;">
             IN PROGRESS <span style="background: #E5E7EB; padding: 0.125rem 0.5rem; border-radius: 9999px;">{{ in_progress_tasks.count }}</span>
         </h3>
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div class="kanban-column" data-status="In Progress" style="display: flex; flex-direction: column; gap: 1rem; min-height: 200px;">
             {% for task in in_progress_tasks %}
                 {% include 'tasks/partials/task_card.html' with task=task %}
             {% empty %}
@@ -53,7 +96,7 @@
         <h3 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 1rem; display: flex; justify-content: space-between;">
             REVIEW <span style="background: #E5E7EB; padding: 0.125rem 0.5rem; border-radius: 9999px;">{{ review_tasks.count }}</span>
         </h3>
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div class="kanban-column" data-status="Review" style="display: flex; flex-direction: column; gap: 1rem; min-height: 200px;">
             {% for task in review_tasks %}
                 {% include 'tasks/partials/task_card.html' with task=task %}
             {% empty %}
@@ -67,7 +110,7 @@
         <h3 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 1rem; display: flex; justify-content: space-between;">
             DONE <span style="background: #E5E7EB; padding: 0.125rem 0.5rem; border-radius: 9999px;">{{ done_tasks.count }}</span>
         </h3>
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div class="kanban-column" data-status="Done" style="display: flex; flex-direction: column; gap: 1rem; min-height: 200px;">
             {% for task in done_tasks %}
                 {% include 'tasks/partials/task_card.html' with task=task %}
             {% empty %}
@@ -77,4 +120,112 @@
     </div>
 
 </div>
+
+<div id="view-list" style="display: none; background: white; border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead style="background: #F9FAFB; border-bottom: 1px solid var(--border-color);">
+            <tr>
+                <th style="padding: 1rem; font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Title</th>
+                <th style="padding: 1rem; font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Project</th>
+                <th style="padding: 1rem; font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Status</th>
+                <th style="padding: 1rem; font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Priority</th>
+                <th style="padding: 1rem; font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Assignee</th>
+                <th style="padding: 1rem; font-weight: 600; color: var(--text-secondary); font-size: 0.875rem;">Due Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr style="border-bottom: 1px solid var(--border-color); cursor: pointer;" onmouseover="this.style.backgroundColor='#F9FAFB'" onmouseout="this.style.backgroundColor='transparent'" onclick="window.location='{% url 'task_detail' task.pk %}'">
+                <td style="padding: 1rem; font-weight: 500;">{{ task.title }}</td>
+                <td style="padding: 1rem; color: var(--text-secondary);">{{ task.project.name }}</td>
+                <td style="padding: 1rem;">
+                    <span style="font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 9999px; background: #F3F4F6;">{{ task.status }}</span>
+                </td>
+                <td style="padding: 1rem;">
+                    <span style="font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 9999px;
+                        {% if task.priority == 'High' %}background: #FEE2E2; color: #991B1B;
+                        {% elif task.priority == 'Medium' %}background: #FEF3C7; color: #92400E;
+                        {% else %}background: #D1FAE5; color: #065F46;{% endif %}">
+                        {{ task.priority }}
+                    </span>
+                </td>
+                <td style="padding: 1rem; color: var(--text-secondary);">{{ task.assignee.email|default:"Unassigned" }}</td>
+                <td style="padding: 1rem; color: var(--text-secondary);">{{ task.due_date|date:"M d, Y"|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">No tasks found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const kanbanBtn = document.getElementById('view-kanban-btn');
+        const listBtn = document.getElementById('view-list-btn');
+        const viewKanban = document.getElementById('view-kanban');
+        const viewList = document.getElementById('view-list');
+        
+        const preferredView = localStorage.getItem('task_view_preference') || 'kanban';
+        
+        function setView(view) {
+            if (view === 'list') {
+                viewKanban.style.display = 'none';
+                viewList.style.display = 'block';
+                listBtn.style.color = 'var(--primary-color)';
+                kanbanBtn.style.color = 'var(--text-secondary)';
+            } else {
+                viewKanban.style.display = 'grid';
+                viewList.style.display = 'none';
+                kanbanBtn.style.color = 'var(--primary-color)';
+                listBtn.style.color = 'var(--text-secondary)';
+            }
+            localStorage.setItem('task_view_preference', view);
+        }
+        
+        setView(preferredView);
+        
+        kanbanBtn.addEventListener('click', () => setView('kanban'));
+        listBtn.addEventListener('click', () => setView('list'));
+
+        var columns = document.querySelectorAll('.kanban-column');
+        
+        columns.forEach(function(col) {
+            new Sortable(col, {
+                group: 'shared', // set both lists to same group
+                animation: 150,
+                onEnd: function (evt) {
+                    var itemEl = evt.item;  // dragged HTMLElement
+                    var newStatus = evt.to.getAttribute('data-status'); // target list
+                    var taskId = itemEl.getAttribute('data-task-id');
+                    
+                    if (taskId && newStatus && evt.from !== evt.to) {
+                        fetch(`/tasks/api/${taskId}/status/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({ status: newStatus })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                alert("Error updating status: " + data.error);
+                                // Optionally revert the drag
+                                evt.from.insertBefore(itemEl, evt.from.children[evt.oldIndex]);
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Error:", err);
+                        });
+                    }
+                },
+            });
+        });
+    });
+</script>
 {% endblock %}

@@ -1,1 +1,130 @@
-<h1>This is the Billing Page</h1>
+{% extends 'base.html' %}
+
+{% block title %}Billing & Subscription | TenantFlow{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 class="section-title" style="margin-bottom: 0;">Billing & Subscription</h1>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">Manage your organization's plan and payment methods.</p>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <div>
+            <!-- Current Plan -->
+            <div style="background: var(--surface-color); border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem;">{{ plan_name }}</h3>
+                        <p style="color: var(--text-secondary); margin: 0;">Your next billing date is <strong>{{ next_billing_date }}</strong>.</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">{{ price }}</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn" id="upgrade-plan-btn">Upgrade Plan</button>
+                    <button class="btn" style="background: white; color: var(--text-primary); border: 1px solid var(--border-color);">Cancel Subscription</button>
+                </div>
+            </div>
+
+            <!-- Usage Statistics -->
+            <div style="background: var(--surface-color); border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 2rem;">
+                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem;">Usage Statistics</h3>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 500;">Users</span>
+                        <span style="color: var(--text-secondary);">{{ users_used }} / {{ users_limit }}</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: #E5E7EB; border-radius: 4px; overflow: hidden;">
+                        <div style="height: 100%; width: 20%; background: var(--primary-color);"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 500;">Storage</span>
+                        <span style="color: var(--text-secondary);">{{ storage_used }} / {{ storage_limit }}</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: #E5E7EB; border-radius: 4px; overflow: hidden;">
+                        <div style="height: 100%; width: 24%; background: var(--primary-color);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <!-- Payment Method -->
+            <div style="background: var(--surface-color); border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Payment Method</h3>
+                </div>
+                
+                <div style="border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 1rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="width: 48px; height: 32px; background: #F3F4F6; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #1F2937; font-size: 0.75rem;">VISA</div>
+                    <div>
+                        <div style="font-weight: 500;">Visa ending in 4242</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Expires 12/28</div>
+                    </div>
+                </div>
+                
+                <button class="btn" style="width: 100%; background: white; color: var(--text-primary); border: 1px solid var(--border-color);">Update Payment Method</button>
+            </div>
+            
+            <!-- Invoices -->
+            <div style="background: var(--surface-color); border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 2rem;">
+                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem;">Recent Invoices</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                        <div>
+                            <div style="font-weight: 500;">Sep 1, 2026</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">₹999.00</div>
+                        </div>
+                        <a href="#" style="color: var(--primary-color); text-decoration: none; font-size: 0.875rem;">Download</a>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                        <div>
+                            <div style="font-weight: 500;">Aug 1, 2026</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">₹999.00</div>
+                        </div>
+                        <a href="#" style="color: var(--primary-color); text-decoration: none; font-size: 0.875rem;">Download</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('upgrade-plan-btn').onclick = function(e){
+    // Mock Razorpay Integration
+    var options = {
+        "key": "rzp_test_mock_key", // Enter the Key ID generated from the Dashboard
+        "amount": "299900", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+        "currency": "INR",
+        "name": "TenantFlow",
+        "description": "Upgrade to Enterprise Plan",
+        "image": "https://example.com/your_logo",
+        "handler": function (response){
+            alert("Payment successful! Mock ID: " + response.razorpay_payment_id);
+        },
+        "prefill": {
+            "name": "{{ request.user.email }}",
+            "email": "{{ request.user.email }}"
+        },
+        "theme": {
+            "color": "#0066CC"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.open();
+    e.preventDefault();
+}
+</script>
+{% endblock %}

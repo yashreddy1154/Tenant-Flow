@@ -6,4 +6,5 @@ urlpatterns = [
     path('settings/', views.org_settings_view, name='org_settings'),
     path('team/', views.team_management_view, name='team_management'),
     path('billing/', views.billing_view, name='billing'),
+    path('roles/', views.roles_permissions_view, name='roles_permissions'),
 ]

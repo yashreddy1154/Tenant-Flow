@@ -5,7 +5,7 @@
 {% block content %}
 <h1 class="section-title">Dashboard</h1>
 
-<div class="stats-grid">
+<div class="stats-grid" style="margin-bottom: 2rem;">
     <div class="stat-card">
         <span class="stat-title">Active Projects</span>
         <span class="stat-value">{{ projects_count|default:"0" }}</span>
@@ -20,8 +20,63 @@
     </div>
 </div>
 
-<div style="background: var(--surface-color); padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-    <h3>Welcome to TenantFlow</h3>
-    <p style="margin-top: 1rem; color: var(--text-secondary);">This is a placeholder for your recent activity and notifications.</p>
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+    <!-- Left Column: Open Tasks -->
+    <div style="background: var(--surface-color); padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.125rem; font-weight: 600;">My Open Tasks</h3>
+            <a href="{% url 'task_list' %}" style="font-size: 0.875rem; color: var(--primary-color); text-decoration: none; font-weight: 500;">View all</a>
+        </div>
+        
+        {% if my_tasks %}
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for task in my_tasks %}
+                    <a href="{% url 'task_detail' task.pk %}" style="text-decoration: none; color: inherit; display: block; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="font-size: 0.875rem; font-weight: 500; color: var(--text-primary); margin-bottom: 0.25rem;">{{ task.title }}</h4>
+                                <span style="font-size: 0.75rem; color: var(--text-secondary);">in {{ task.project.name }}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <span style="font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 9999px; background: #F3F4F6; color: var(--text-secondary);">{{ task.status }}</span>
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); width: 60px; text-align: right;">
+                                    {% if task.due_date %}{{ task.due_date|date:"M d" }}{% else %}-{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 2rem; color: var(--text-secondary); font-size: 0.875rem;">
+                You have no open tasks. Great job!
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Right Column: Recent Projects -->
+    <div style="background: var(--surface-color); padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.125rem; font-weight: 600;">Recent Projects</h3>
+        </div>
+        
+        {% if recent_projects %}
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for project in recent_projects %}
+                    <a href="{% url 'project_detail' project.pk %}" style="text-decoration: none; color: inherit; display: block; background: #F9FAFB; padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">
+                        <h4 style="font-size: 0.875rem; font-weight: 500; color: var(--text-primary); margin-bottom: 0.25rem;">{{ project.name }}</h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);">{{ project.tasks.count }} tasks</span>
+                            <span style="font-size: 0.75rem; font-weight: 600; color: {% if project.status == 'Active' %}#059669{% else %}#6B7280{% endif %};">{{ project.status }}</span>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 2rem; color: var(--text-secondary); font-size: 0.875rem;">
+                No projects found.
+            </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

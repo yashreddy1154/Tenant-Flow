@@ -28,7 +28,9 @@
         </div>
     </div>
     <div style="display: flex; gap: 1rem;">
-        <button class="btn" style="background-color: var(--bg-color); color: var(--text-primary); border: 1px solid var(--border-color);">Edit Task</button>
+        {% if form %}
+            <!-- Editing is inline, no separate button needed unless we want to toggle it, but let's just show a save button below the form instead -->
+        {% endif %}
     </div>
 </div>
 
@@ -36,8 +38,106 @@
     <!-- Main Info -->
     <div>
         <div style="background: var(--surface-color); padding: 2rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-            <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Description</h3>
-            <p style="color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap;">{{ task.description|default:"No description provided." }}</p>
+            {% if form %}
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if can_edit_all %}
+                        {% for field in form %}
+                            <div style="margin-bottom: 1.5rem;">
+                                <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.875rem;">
+                                    {{ field.label }}
+                                </label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div style="color: #DC2626; font-size: 0.75rem; margin-top: 0.25rem;">{{ field.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% elif can_edit_status %}
+                        <div style="margin-bottom: 1.5rem;">
+                            <label for="{{ form.status.id_for_label }}" style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.875rem;">
+                                Update Status
+                            </label>
+                            {{ form.status }}
+                        </div>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; margin-top: 2rem;">Description</h3>
+                        <p style="color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap;">{{ task.description|default:"No description provided." }}</p>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn">Save Changes</button>
+                </form>
+            {% else %}
+                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Description</h3>
+                <p style="color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap;">{{ task.description|default:"No description provided." }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Subtasks Section -->
+        <div style="background: var(--surface-color); padding: 2rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+            <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">Subtasks</h3>
+            
+            <div style="margin-bottom: 1.5rem;">
+                {% for subtask in task.subtasks.all %}
+                    <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-bottom: 1px solid #F3F4F6;">
+                        <form method="post" action="{% url 'task_subtask_toggle' subtask.pk %}" style="margin: 0; display: flex; align-items: center;">
+                            {% csrf_token %}
+                            <button type="submit" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center;">
+                                {% if subtask.is_completed %}
+                                    <div style="width: 20px; height: 20px; border-radius: 4px; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center;">✓</div>
+                                {% else %}
+                                    <div style="width: 20px; height: 20px; border-radius: 4px; border: 2px solid var(--border-color);"></div>
+                                {% endif %}
+                            </button>
+                        </form>
+                        <span style="{% if subtask.is_completed %}text-decoration: line-through; color: var(--text-secondary);{% else %}color: var(--text-primary);{% endif %}">{{ subtask.title }}</span>
+                    </div>
+                {% empty %}
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">No subtasks yet.</p>
+                {% endfor %}
+            </div>
+
+            {% if can_edit_all or can_edit_status %}
+            <form method="post" action="{% url 'task_subtask_create' task.pk %}" style="display: flex; gap: 1rem;">
+                {% csrf_token %}
+                <input type="text" name="title" placeholder="Add a subtask..." style="flex: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.5rem; font-family: inherit;" required>
+                <button type="submit" class="btn" style="padding: 0.75rem 1.5rem;">Add</button>
+            </form>
+            {% endif %}
+        </div>
+
+        <!-- Comments Section -->
+        <div style="background: var(--surface-color); padding: 2rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">Comments</h3>
+            
+            <div style="margin-bottom: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
+                {% for comment in task.comments.all %}
+                    <div style="display: flex; gap: 1rem;">
+                        <div style="width: 32px; height: 32px; flex-shrink: 0; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 600;">
+                            {{ comment.user.email|make_list|first|upper }}
+                        </div>
+                        <div style="background: #F9FAFB; padding: 1rem; border-radius: 0.5rem; flex: 1;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="font-weight: 600; font-size: 0.875rem;">{{ comment.user.email }}</span>
+                                <span style="font-size: 0.75rem; color: var(--text-secondary);">{{ comment.created_at|date:"M d, h:i A" }}</span>
+                            </div>
+                            <p style="margin: 0; font-size: 0.875rem; line-height: 1.5;">{{ comment.text }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">No comments yet.</p>
+                {% endfor %}
+            </div>
+
+            <form method="post" action="{% url 'task_comment_create' task.pk %}">
+                {% csrf_token %}
+                <div style="margin-bottom: 1rem;">
+                    {{ comment_form.text }}
+                </div>
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn">Post Comment</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -45,6 +145,17 @@
     <div>
         <div style="background: var(--surface-color); padding: 1.5rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
             <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">Task Details</h3>
+            
+            {% if task.labels.all %}
+            <div style="margin-bottom: 1.25rem;">
+                <span style="display: block; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.5rem;">Labels</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+                    {% for label in task.labels.all %}
+                        <span style="font-size: 0.75rem; background-color: {{ label.color|default:'#E5E7EB' }}; color: #1F2937; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500;">{{ label.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
             
             <div style="margin-bottom: 1.25rem;">
                 <span style="display: block; font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 0.25rem;">Assignee</span>

@@ -1,1 +1,65 @@
-<h1>This is the Team Management Page</h1>
+{% extends 'base.html' %}
+
+{% block title %}Team | TenantFlow{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1 class="section-title" style="margin-bottom: 0;">Team Members</h1>
+    {% if request.user.role == 'Admin' %}
+    <a href="{% url 'invite_member' %}" class="btn">+ Invite Member</a>
+    {% endif %}
+</div>
+
+<div style="background: var(--surface-color); border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead style="background-color: #F9FAFB; border-bottom: 1px solid var(--border-color);">
+            <tr>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">User</th>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Role</th>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Department</th>
+                <th style="padding: 1rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Joined</th>
+                <th style="padding: 1rem 1.5rem; text-align: right; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Actions</th>
+            </tr>
+        </thead>
+        <tbody style="divide-y: 1px solid var(--border-color);">
+            {% for member in members %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 1rem 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 32px; height: 32px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 600;">
+                                {{ member.email|make_list|first|upper }}
+                            </div>
+                            <div>
+                                <div style="font-weight: 500; color: var(--text-primary);">{{ member.email }}</div>
+                                {% if member == request.user %}
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">You</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 1rem 1.5rem;">
+                        <span style="font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 9999px; 
+                            {% if member.role == 'Admin' %}background-color: #EEF2FF; color: #4338CA;{% else %}background-color: #F3F4F6; color: #4B5563;{% endif %}">
+                            {{ member.role|default:"Member" }}
+                        </span>
+                    </td>
+                    <td style="padding: 1rem 1.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        {{ member.department|default:"—" }}
+                    </td>
+                    <td style="padding: 1rem 1.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        {{ member.date_joined|date:"M d, Y" }}
+                    </td>
+                    <td style="padding: 1rem 1.5rem; text-align: right;">
+                        {% if request.user.role == 'Admin' %}
+                            <a href="{% url 'member_edit' member.pk %}" style="color: var(--primary-color); text-decoration: none; font-size: 0.875rem; font-weight: 500; margin-right: 1rem;">Edit</a>
+                            {% if member != request.user %}
+                                <a href="{% url 'member_remove' member.pk %}" style="color: #DC2626; text-decoration: none; font-size: 0.875rem; font-weight: 500;">Remove</a>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
