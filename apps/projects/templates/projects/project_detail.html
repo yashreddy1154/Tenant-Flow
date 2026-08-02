@@ -20,7 +20,7 @@
     </div>
     <div style="display: flex; gap: 1rem;">
         <button class="btn" style="background-color: var(--bg-color); color: var(--text-primary); border: 1px solid var(--border-color);">Edit Project</button>
-        <button class="btn">+ New Task</button>
+        <a href="{% url 'task_create' %}?project={{ project.pk }}" class="btn">+ New Task</a>
     </div>
 </div>
 
@@ -41,12 +41,15 @@
             </div>
             
             {% if project.tasks.exists %}
-                <!-- Tasks will be rendered here later -->
-                <p style="color: var(--text-secondary); font-size: 0.875rem;">Tasks list coming soon.</p>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    {% for task in project.tasks.all %}
+                        {% include 'tasks/partials/task_card.html' with task=task %}
+                    {% endfor %}
+                </div>
             {% else %}
                 <div style="text-align: center; padding: 2rem; border: 1px dashed var(--border-color); border-radius: 0.5rem;">
                     <p style="color: var(--text-secondary); margin-bottom: 1rem;">No tasks created yet.</p>
-                    <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Create First Task</button>
+                    <a href="{% url 'task_create' %}?project={{ project.pk }}" class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Create First Task</a>
                 </div>
             {% endif %}
         </div>

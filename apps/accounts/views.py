@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm
@@ -12,10 +11,7 @@ from django.contrib import messages
 from apps.users.models import User
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-=======
-from django.shortcuts import render
 from django.http import HttpResponse
->>>>>>> c383e2dfe8de1352ab1da099819b574f9c070c89
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -54,7 +50,6 @@ def signup_view(request):
         
     return render(request, 'accounts/signup.html', {'form': form})
 
-<<<<<<< HEAD
 def logout_view(request):
     logout(request)
     return redirect('login')
@@ -109,17 +104,11 @@ def join_organization_view(request, uidb64, token):
     else:
         messages.error(request, "The invite link is invalid or has expired.")
         return redirect('login')
-=======
 def verify_email_view(request):
     return render(request, 'accounts/verify_email.html')
 
 def login_user(req):
-    
-    
     return render(req,"accounts/login_user.html")
 
 def regester(req):
-    
-    
     return render(req,"accounts/register.html")
->>>>>>> c383e2dfe8de1352ab1da099819b574f9c070c89
