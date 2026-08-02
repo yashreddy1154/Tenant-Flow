@@ -73,13 +73,15 @@ def invite_member_view(request):
                 elif user.organization == request.user.organization:
                     messages.info(request, f"User {email} is already in your team.")
                     return redirect('team_management')
-            else:
+            
+            if created:
                 # Create a user with unusable password if they are brand new
                 user.set_unusable_password()
-                user.organization = request.user.organization
-                user.role = role
-                user.department = department
-                user.save()
+                
+            user.organization = request.user.organization
+            user.role = role
+            user.department = department
+            user.save()
             
             # Generate token and send email
             token = default_token_generator.make_token(user)
